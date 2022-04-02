@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'utils/roller.dart';
@@ -7,21 +6,17 @@ import 'utils/roller.dart';
 // TODO: Add a feature to show the enemy's selection when the throw button is clicked.
 
 void main() {
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Rock Paper Scissors',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(title: 'Rock Paper Scissors'),
+      home: HomePage(title: 'Rock Paper Scissors'),
     );
   }
 }
@@ -36,19 +31,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String gameOutcome = "";
+  String _gameOutcome = "";
+  late GameOption _enemyGameOption;
+  bool gameStarted = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueGrey,
       appBar: AppBar(
         title: Text(widget.title),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(gameOutcome),
+            IconButton(
+                onPressed: () => setState(() {
+                      gameStarted = false;
+                      _gameOutcome = "";
+                    }),
+                icon: const Icon(Icons.refresh)),
+            Text("Enemy option: ${gameStarted ? _enemyGameOption.name : "You can't see this yet!"}", style: const TextStyle(fontSize: 20, ),),
+            Text(_gameOutcome),
             Row(
               children: const [
                 Padding(
@@ -86,25 +92,30 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  GameOption _createEnemyGameOption() => GameOption.values[rollDie(3) - 1];
+  GameOption createEnemyGameOption() => GameOption.values[rollDie(3) - 1];
 
-  void playGame(GameOption userOption,) {
+  void playGame(
+    GameOption userOption,
+  ) {
     setState(() {
-      final enemyGameOption = _createEnemyGameOption();
+      final enemyGameOption = createEnemyGameOption();
 
       if (userOption == enemyGameOption) {
-        gameOutcome = "Its a tie!";
+        _gameOutcome = "Its a tie!";
       } else if (userOption == GameOption.rock && enemyGameOption == GameOption.scissors) {
-        gameOutcome = "You win!";
+        _gameOutcome = "You win!";
       } else if (userOption == GameOption.rock && enemyGameOption == GameOption.paper) {
-        gameOutcome = "Enemy wins with ${enemyGameOption.name}!";
+        _gameOutcome = "Enemy wins with ${enemyGameOption.name}!";
       } else if (userOption == GameOption.scissors && enemyGameOption == GameOption.paper) {
-        gameOutcome = "You win!";
+        _gameOutcome = "You win!";
       } else if (enemyGameOption == GameOption.rock && userOption == GameOption.scissors) {
-        gameOutcome = "Enemy wins with ${enemyGameOption.name}!";
+        _gameOutcome = "Enemy wins with ${enemyGameOption.name}!";
       } else {
-        gameOutcome = "Enemy wins with ${enemyGameOption.name}!";
+        _gameOutcome = "Enemy wins with ${enemyGameOption.name}!";
       }
+
+      _enemyGameOption = enemyGameOption;
+      gameStarted = true;
     });
   }
 }
